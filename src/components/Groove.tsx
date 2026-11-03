@@ -151,6 +151,8 @@ export function Groove({ pattern, bpm: bpm0, mode: mode0, onBack }: { pattern: P
       <h2>{pattern.title}</h2>
       <p className="muted">{pattern.hint}</p>
 
+      <div className="gv">
+      <div className="gv-main">
       <div className="grid" style={{ ['--cols' as any]: Math.min(perBar, 8) }}>
         {steps.map((s, i) => (
           <div key={i} className={['cell', i % pattern.sub === 0 ? 'beat' : '', i === cur ? 'now' : '', res[i] ?? '', s.sound ? '' : 'rest', i % perBar === 0 && i ? 'newbar' : ''].join(' ')}>
@@ -160,6 +162,8 @@ export function Groove({ pattern, bpm: bpm0, mode: mode0, onBack }: { pattern: P
         ))}
       </div>
       <div className="countin">{count > 0 ? `Einzähler: ${count}` : playing ? '' : ' '}</div>
+      </div>
+      <div className="gv-side">
 
       <div className="controls">
         <div className="seg small">
@@ -194,7 +198,7 @@ export function Groove({ pattern, bpm: bpm0, mode: mode0, onBack }: { pattern: P
         </div>
       )}
 
-      <details className="settings">
+      <details className="settings sub">
         <summary>Einstellungen Mikro</summary>
         <label className="block">Empfindlichkeit
           <input type="range" min={2} max={10} step={0.5} value={11 - cfg.sens} onChange={e => setCfg(store.update(d => { d.sens = 11 - +e.target.value; }))} />
@@ -204,6 +208,8 @@ export function Groove({ pattern, bpm: bpm0, mode: mode0, onBack }: { pattern: P
         </label>
         <p className="muted small">Kalibrieren: Öffne „Kick auf jedem Schlag“, Modus „Solo + Klick“, Mikro-Analyse an, 16 Kicks exakt auf den Klick, Stopp → „Als Latenz übernehmen“.</p>
       </details>
+      </div>
+      </div>
     </section>
   );
 }

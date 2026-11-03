@@ -1,10 +1,27 @@
 import { useState } from 'react';
+import type React from 'react';
 import { WEEKS, type Session, type Block } from './plan';
 import { PATTERNS, CAT_NAMES, patternById, type Pattern, type Cat } from './patterns';
 import { SOUNDS, soundById, type Sound } from './sounds';
 import { Groove, MODE_NAMES, starsFor, type Mode } from './components/Groove';
 import { playSound } from './audio';
 import { store } from './store';
+
+const FOLD_KEY = 'beatbox-trainer-fold';
+function foldState(): Record<string, boolean> { try { return JSON.parse(localStorage.getItem(FOLD_KEY) || '{}'); } catch { return {}; } }
+function Fold({ id, title, extra, defaultOpen = true, children }: { id: string; title: string; extra?: React.ReactNode; defaultOpen?: boolean; children: React.ReactNode }) {
+  const [open, setOpen] = useState(foldState()[id] ?? defaultOpen);
+  const toggle = (e: React.SyntheticEvent<HTMLDetailsElement>) => {
+    const o = e.currentTarget.open; setOpen(o);
+    try { localStorage.setItem(FOLD_KEY, JSON.stringify({ ...foldState(), [id]: o })); } catch {}
+  };
+  return (
+    <details className="card fold" open={open} onToggle={toggle}>
+      <summary><h2>{title}</h2>{extra}<span className="chev" aria-hidden>▾</span></summary>
+      <div className="fold-body">{children}</div>
+    </details>
+  );
+}
 
 type View =
   | { kind: 'home' }
@@ -24,13 +41,13 @@ function SoundView({ s, onBack, onDrill }: { s: Sound; onBack: () => void; onDri
         <button className="ghost" onClick={() => [0, 1, 2, 3].forEach(i => setTimeout(() => playSound(s.id), i * 600))}>4× im Abstand</button>
       </div>
       <p className="muted small">Der Demo-Klang ist synthetisch erzeugt – er zeigt Charakter und Länge. Dein Mund-Klang darf natürlicher klingen.</p>
-      <h3>So geht’s</h3>
-      <ol className="steps">{s.how.map((h, i) => <li key={i}>{h}</li>)}</ol>
-      <h3>Typische Fehler</h3>
-      <ul className="steps">{s.mistakes.map((h, i) => <li key={i}>{h}</li>)}</ul>
-      <h3>Übung</h3>
-      <p>{s.drill}</p>
-      <button onClick={onDrill}>▶ Im Groove-Trainer üben</button>
+      <div className="two">
+        <details className="sub" open><summary>So geht’s</summary><ol className="steps">{s.how.map((h, i) => <li key={i}>{h}</li>)}</ol></details>
+        <div>
+          <details className="sub" open><summary>Typische Fehler</summary><ul className="steps">{s.mistakes.map((h, i) => <li key={i}>{h}</li>)}</ul></details>
+          <details className="sub" open><summary>Übung</summary><p>{s.drill}</p><button onClick={onDrill}>▶ Im Groove-Trainer üben</button></details>
+        </div>
+      </div>
     </section>
   );
 }
@@ -69,12 +86,12 @@ export default function App() {
             <button className="ghost" onClick={() => go({ kind: 'home' })}>← Zurück</button>
             <h2>{sv.s.title}</h2>
             <p className="muted">{sv.s.blocks.reduce((a, b) => a + b.min, 0)} Minuten · Aufwärmen → Klang → Groove → Anwenden</p>
-            {sv.s.blocks.map((b, k) => (
+            <div className="blocks">{sv.s.blocks.map((b, k) => (
               <div className="block-item" key={k}>
                 <span className="kind">{b.kind}<br /><small>{b.min} Min</small></span>
                 <div><p>{b.text}</p><div className="row">{blockButtons(b, sv)}</div></div>
               </div>
-            ))}
+            ))}</div>
             <button className={data.done[sv.s.id] ? 'ghost' : ''} onClick={() => toggle(sv.s.id)}>
               {data.done[sv.s.id] ? '✓ Erledigt (rückgängig)' : 'Einheit als erledigt markieren'}
             </button>
@@ -91,8 +108,7 @@ export default function App() {
           </section>
 
           <div className="home-grid"><div>
-            <section className="card">
-              <h2>Dein 8-Wochen-Plan</h2>
+            <Fold id="plan" title="Dein 8-Wochen-Plan">
               <p className="muted">Kurze, regelmäßige Einheiten sind beim Beatboxen besser als lange – Lippen und Atmung ermüden schnell. Zwischendurch täglich 2 Minuten Grundbeat (im Auto, unter der Dusche) wirkt Wunder.</p>
               {WEEKS.map(w => {
                 const d = w.sessions.filter(x => data.done[x.id]).length;
@@ -108,10 +124,9 @@ export default function App() {
                   </details>
                 );
               })}
-            </section>
+            </Fold>
           </div><div>
-            <section className="card">
-              <h2>Klänge</h2>
+            <Fold id="sounds" title="Klänge" extra={<span className="badge">{SOUNDS.length}</span>}>
               <div className="songs">
                 {SOUNDS.map(s => (
                   <button key={s.id} className="song" onClick={() => go({ kind: 'sound', s })}>
@@ -120,10 +135,10 @@ export default function App() {
                   </button>
                 ))}
               </div>
-            </section>
+            </Fold>
             {(Object.keys(CAT_NAMES) as Cat[]).map(cat => (
-              <section className="card" key={cat}>
-                <h2>{CAT_NAMES[cat]}</h2>
+              <Fold key={cat} id={'cat-' + cat} title={CAT_NAMES[cat]} defaultOpen={cat === 'basis'}
+                extra={<span className="badge">{PATTERNS.filter(p => p.cat === cat && data.best[p.id]).length}/{PATTERNS.filter(p => p.cat === cat).length} ★</span>}>
                 <div className="songs">
                   {PATTERNS.filter(p => p.cat === cat).map(p => {
                     const b = data.best[p.id];
@@ -136,12 +151,11 @@ export default function App() {
                     );
                   })}
                 </div>
-              </section>
+              </Fold>
             ))}
-            <section className="card">
-              <h2>Notation</h2>
+            <Fold id="notation" title="Notation" defaultOpen={false}>
               <p className="muted small">Jedes Kästchen ist ein Schritt (Achtel oder Sechzehntel). Die Zahlen sind die Schläge, bei denen der Klick kommt. <strong>·</strong> = Pause. Kleines <strong>k</strong> = eingeatmet.</p>
-            </section>
+            </Fold>
           </div></div>
         </>}
       </main>

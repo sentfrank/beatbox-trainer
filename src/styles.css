@@ -50,3 +50,62 @@ button.big{font-size:1.1rem;padding:12px 26px}
 .settings input[type=range]{width:200px}
 audio{vertical-align:middle;max-width:100%}
 .row{margin:8px 0}
+/* ---------- Responsives Layout ---------- */
+header{position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0}
+.fold{padding:0}.fold>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:16px 20px;cursor:pointer;user-select:none}
+.fold>summary::-webkit-details-marker{display:none}.fold>summary h2{margin:0;flex:1;font-size:1.2rem}
+.chev{color:var(--muted);transition:transform .2s;font-size:1.1rem}.fold:not([open]) .chev{transform:rotate(-90deg)}
+.fold-body{padding:0 20px 20px}
+.sub{border-top:1px solid var(--line);padding:6px 0}.sub>summary{cursor:pointer;font-weight:700;color:var(--accent);padding:6px 0}
+.two{display:block}.blocks{display:block}
+.gv{display:block}.gv-side .row{flex-wrap:wrap}
+.controls label{display:flex;align-items:center;flex-wrap:wrap}
+.controls input[type=range]{flex:1;min-width:140px}
+
+/* Tablet hochkant / kleiner Laptop */
+@media (min-width:700px){
+  .blocks{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+}
+/* Breite Bildschirme: Startseite zweispaltig */
+@media (min-width:900px){
+  .home-grid{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:16px;align-items:start}
+  .home-grid>div:first-child{position:sticky;top:64px;max-height:calc(100vh - 80px);overflow:auto;border-radius:16px}
+}
+/* Querformat (iPad quer, Laptop): Groove-Raster links, Steuerung rechts */
+@media (orientation:landscape) and (min-width:900px){
+  .gv{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+  .gv-side{border-left:1px solid var(--line);padding-left:20px}
+  .gv-side .controls{flex-direction:column;align-items:stretch}
+  .gv-side .seg{width:100%}.gv-side .seg button{flex:1}
+  .gv-side button.big{flex:1}
+  .practice .grid{margin-top:8px}
+  .cell{max-height:none}
+}
+@media (min-width:1400px){ .app{max-width:1440px} .songs{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))} }
+/* Niedrige Höhe im Querformat: kompakter */
+@media (orientation:landscape) and (max-height:820px){
+  .app{padding:6px 14px}h1{font-size:1.15rem}
+  .practice{padding:10px 14px}.practice h2{font-size:1.15rem;margin:0}.practice>p.muted{margin:2px 0 4px;font-size:.88rem}
+  .cell{aspect-ratio:auto;height:clamp(54px,15vh,110px)}
+  .fold>summary{padding:12px 16px}.fold-body{padding:0 16px 16px}
+}
+/* Smartphone */
+@media (max-width:600px){
+  .app{padding:8px}.card{padding:14px}.fold>summary{padding:14px}.fold-body{padding:0 14px 14px}
+  .songs{grid-template-columns:1fr 1fr;gap:8px}.song{padding:8px 10px;font-size:.92rem}
+  .grid{--cols:4!important}
+  .seg{width:100%}.seg button{flex:1;padding:8px 4px}
+  .block-item{flex-direction:column;gap:4px}.kind br{display:none}.kind small::before{content:' · '}
+  button.big{width:100%}
+}
+.app{max-width:1280px}
+.controls label{gap:6px}
+@media (orientation:landscape) and (min-width:900px){
+  .practice{min-height:calc(100vh - 70px);display:flex;flex-direction:column}
+  .gv{flex:1}.gv-main{display:flex;flex-direction:column;height:100%}
+  .gv-main .grid{flex:1;align-content:center}
+  .cell{aspect-ratio:auto;height:clamp(70px,22vh,170px)}
+  .cell .tok{font-size:clamp(1.4rem,3vw,2.6rem)}
+}
+@media (max-width:600px){.cell .tok{font-size:1.4rem}.cell{max-height:64px}}
