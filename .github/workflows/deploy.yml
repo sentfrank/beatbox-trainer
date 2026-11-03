@@ -43,6 +43,11 @@ jobs:
       - name: Ordner auf Strato anzeigen
         if: env.USER != ''
         run: lftp -u "$USER","$PASS" "sftp://$HOST" -e "set sftp:auto-confirm yes; echo '== Wurzel =='; cls -1; echo '== w-esel =='; cls -1 w-esel/; echo '== Ziel =='; cls -l $TARGET/; bye" || true
+      - name: Erreichbarkeit prüfen
+        if: env.USER != ''
+        run: |
+          lftp -u "$USER","$PASS" "sftp://$HOST" -e "set sftp:auto-confirm yes; echo '== Wurzel =='; ls; echo '== w-esel =='; ls w-esel; echo '== Ziel =='; ls $TARGET; bye" || true
+          for u in https://w-esel.de/beatbox-trainer/ https://www.w-esel.de/beatbox-trainer/ https://w-esel.de/klavier-trainer/; do echo "== $u"; curl -sSIL "$u" | grep -iE '^(HTTP|location)'; done || true
       - name: Hinweis
         if: env.USER == ''
         run: echo "::warning::STRATO_SFTP_USER / STRATO_SFTP_PASSWORD fehlen – Strato-Upload übersprungen."
