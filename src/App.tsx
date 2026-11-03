@@ -6,6 +6,7 @@ import { SOUNDS, soundById, type Sound } from './sounds';
 import { Groove, MODE_NAMES, starsFor, type Mode } from './components/Groove';
 import { playSound } from './audio';
 import { store } from './store';
+import { TOPICS } from './theory';
 
 const FOLD_KEY = 'beatbox-trainer-fold';
 function foldState(): Record<string, boolean> { try { return JSON.parse(localStorage.getItem(FOLD_KEY) || '{}'); } catch { return {}; } }
@@ -27,7 +28,32 @@ type View =
   | { kind: 'home' }
   | { kind: 'session'; s: Session }
   | { kind: 'groove'; p: Pattern; bpm?: number; mode?: Mode; back?: View }
-  | { kind: 'sound'; s: Sound; back?: View };
+  | { kind: 'sound'; s: Sound; back?: View }
+  | { kind: 'wissen'; topic?: string };
+
+function Wissen({ topic, onBack }: { topic?: string; onBack: () => void }) {
+  return (
+    <section className="card">
+      <button className="ghost" onClick={onBack}>← Zurück</button>
+      <h2>Wissen & Tipps</h2>
+      <p className="muted">Theorie zu Klängen, Rhythmus und Atmung – und Praxistipps für Gruppe, Bühne und Üben.</p>
+      {([['theorie', 'Theorie'], ['tipps', 'Tipps & Tricks']] as const).map(([k, t]) => (
+        <div key={k}>
+          <h3>{t}</h3>
+          <div className="topics">
+            {TOPICS.filter(x => x.kind === k).map(x => (
+              <details key={x.id} id={'t-' + x.id} className="sub topic" open={topic === x.id}>
+                <summary>{x.icon} {x.title}</summary>
+                <p className="intro">{x.intro}</p>
+                <dl>{x.points.map(([h, b]) => <div key={h}><dt>{h}</dt><dd>{b}</dd></div>)}</dl>
+              </details>
+            ))}
+          </div>
+        </div>
+      ))}
+    </section>
+  );
+}
 
 function SoundView({ s, onBack, onDrill }: { s: Sound; onBack: () => void; onDrill: () => void }) {
   const [n, setN] = useState(0);
@@ -75,12 +101,14 @@ export default function App() {
 
   return (
     <div className="app">
-      <header><h1 onClick={() => go({ kind: 'home' })}>🥁 Beatbox-Trainer</h1></header>
+      <header><h1 onClick={() => go({ kind: 'home' })}>🥁 Beatbox-Trainer</h1>
+        <button className={'pill ' + (view.kind === 'wissen' ? 'on' : '')} onClick={() => go({ kind: 'wissen' })}>📖 Wissen & Tipps</button></header>
       <main>
         {view.kind === 'groove' && <Groove key={view.p.id} pattern={view.p} bpm={view.bpm} mode={view.mode} onBack={() => go(view.back ?? { kind: 'home' })} />}
         {view.kind === 'sound' && <SoundView s={view.s} onBack={() => go(view.back ?? { kind: 'home' })}
           onDrill={() => go({ kind: 'groove', p: patternById(drillFor[view.s.id])!, mode: 'along', back: view })} />}
 
+        {view.kind === 'wissen' && <Wissen key={view.topic} topic={view.topic} onBack={() => go({ kind: 'home' })} />}
         {view.kind === 'session' && (() => { const sv = view; return (
           <section className="card">
             <button className="ghost" onClick={() => go({ kind: 'home' })}>← Zurück</button>
@@ -126,6 +154,16 @@ export default function App() {
               })}
             </Fold>
           </div><div>
+            <Fold id="wissen" title="Wissen & Tipps" extra={<span className="badge">{TOPICS.length}</span>}>
+              <div className="songs">
+                {TOPICS.map(t => (
+                  <button key={t.id} className="song" onClick={() => go({ kind: 'wissen', topic: t.id })}>
+                    <strong>{t.icon} {t.title}</strong>
+                    <span className="muted small">{t.kind === 'theorie' ? 'Theorie' : 'Tipps & Tricks'}</span>
+                  </button>
+                ))}
+              </div>
+            </Fold>
             <Fold id="sounds" title="Klänge" extra={<span className="badge">{SOUNDS.length}</span>}>
               <div className="songs">
                 {SOUNDS.map(s => (

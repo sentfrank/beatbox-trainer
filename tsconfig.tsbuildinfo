@@ -1,1 +1,1 @@
-{"root":["./src/App.tsx","./src/audio.ts","./src/main.tsx","./src/mic.ts","./src/patterns.ts","./src/plan.ts","./src/sounds.ts","./src/store.ts","./src/components/Groove.tsx"],"version":"5.9.3"}
+{"root":["./src/App.tsx","./src/audio.ts","./src/main.tsx","./src/mic.ts","./src/patterns.ts","./src/plan.ts","./src/sounds.ts","./src/store.ts","./src/theory.ts","./src/components/Groove.tsx"],"version":"5.9.3"}

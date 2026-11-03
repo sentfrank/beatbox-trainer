@@ -109,3 +109,8 @@ header{position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0}
   .cell .tok{font-size:clamp(1.4rem,3vw,2.6rem)}
 }
 @media (max-width:600px){.cell .tok{font-size:1.4rem}.cell{max-height:64px}}
+.topics{display:grid;gap:0 24px}
+@media (min-width:900px){.topics{grid-template-columns:1fr 1fr;align-items:start}}
+.topic>summary{font-size:1.05rem}.topic .intro{margin:4px 0 10px}
+.topic dl{margin:0}.topic dl>div{padding:8px 0;border-top:1px dashed var(--line)}
+.topic dt{font-weight:700}.topic dd{margin:2px 0 0;color:var(--ink)}
